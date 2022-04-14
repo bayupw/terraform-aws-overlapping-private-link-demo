@@ -24,10 +24,10 @@ module "client" {
   version = "1.0.0"
 
   instance_hostname           = "client-instance"
-  vpc_id                      = module.vpcs.["vpc_a"].vpc_id
-  subnet_id                   = module.vpcs.["vpc_a"].public_subnets[0]
+  vpc_id                      = module.vpcs["vpc_a"].vpc_id
+  subnet_id                   = module.vpcs["vpc_a"].public_subnets[0]
   associate_public_ip_address = true
-  private_ip                  = cidrhost(module.vpcs.["vpc_a"].public_subnets_cidr_blocks[0], 11)
+  private_ip                  = cidrhost(module.vpcs["vpc_a"].public_subnets_cidr_blocks[0], 11)
   iam_instance_profile        = module.ssm_instance_profile.aws_iam_instance_profile
 
   depends_on = [module.ssm_instance_profile]
@@ -39,10 +39,10 @@ module "web_server" {
   version = "1.0.0"
 
   instance_hostname           = "web-server-instance"
-  vpc_id                      = module.vpcs.["vpc_b"].vpc_id
-  subnet_id                   = module.vpcs.["vpc_b"].public_subnets[0]
+  vpc_id                      = module.vpcs["vpc_b"].vpc_id
+  subnet_id                   = module.vpcs["vpc_b"].public_subnets[0]
   associate_public_ip_address = true
-  private_ip                  = cidrhost(module.vpcs.["vpc_b"].public_subnets_cidr_blocks[0], 11)
+  private_ip                  = cidrhost(module.vpcs["vpc_b"].public_subnets_cidr_blocks[0], 11)
   iam_instance_profile        = module.ssm_instance_profile.aws_iam_instance_profile
 
   depends_on = [module.ssm_instance_profile]
@@ -55,8 +55,8 @@ module "nlb" {
 
   name               = "nlb"
   load_balancer_type = "network"
-  vpc_id             = module.vpcs.["vpc_b"].vpc_id
-  subnets            = [module.vpcs.["vpc_b"].public_subnets[0]]
+  vpc_id             = module.vpcs["vpc_b"].vpc_id
+  subnets            = [module.vpcs["vpc_b"].public_subnets[0]]
 
   target_groups = [
     {
@@ -107,7 +107,7 @@ resource "aws_vpc_endpoint_service" "web_ep_svc" {
 resource "aws_security_group" "web_endpoint_sg" {
   name        = "web-endpoint-sg"
   description = "Allow all traffic to web-vpc-endpoint"
-  vpc_id      = module.vpcs.["vpc_a"].vpc_id
+  vpc_id      = module.vpcs["vpc_a"].vpc_id
 
   ingress {
     from_port       = 80
@@ -124,9 +124,9 @@ resource "aws_security_group" "web_endpoint_sg" {
 # Create VPC Endpoint Web in VPC-A
 resource "aws_vpc_endpoint" "web_ep" {
   service_name       = aws_vpc_endpoint_service.web_ep_svc.service_name
-  subnet_ids         = [module.vpcs.["vpc_a"].public_subnets[0]]
+  subnet_ids         = [module.vpcs["vpc_a"].public_subnets[0]]
   vpc_endpoint_type  = aws_vpc_endpoint_service.web_ep_svc.service_type
-  vpc_id             = module.vpcs.["vpc_a"].vpc_id
+  vpc_id             = module.vpcs["vpc_a"].vpc_id
   security_group_ids = [aws_security_group.web_endpoint_sg.id]
 
   tags = {
