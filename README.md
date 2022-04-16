@@ -1,6 +1,7 @@
-# Terraform how to solve overlapping IP address with AWS Private Link demo 
+# Terraform AWS Overlapping IP Private Link Demo 
 
 Terraform code to demonstrate how AWS PrivateLink solution can be used to solve overlapping IP in AWS.
+![Terraform AWS Overlapping IP Private Link Demo](images/terraform-aws-overlapping-private-link-demo.png "Terraform AWS Overlapping IP Private Link Demo")
 
 ## Environment Variables
 
