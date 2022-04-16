@@ -23,7 +23,7 @@ module "client" {
   source  = "bayupw/amazon-linux-2/aws"
   version = "1.0.0"
 
-  instance_hostname           = "client-instance"
+  instance_hostname           = "privatelinkdemo-client"
   vpc_id                      = module.vpcs["vpc_a"].vpc_id
   subnet_id                   = module.vpcs["vpc_a"].public_subnets[0]
   associate_public_ip_address = true
@@ -38,7 +38,7 @@ module "web_server" {
   source  = "bayupw/amazon-linux-2/aws"
   version = "1.0.0"
 
-  instance_hostname           = "web-server-instance"
+  instance_hostname           = "privatelinkdemo-web-server"
   vpc_id                      = module.vpcs["vpc_b"].vpc_id
   subnet_id                   = module.vpcs["vpc_b"].public_subnets[0]
   associate_public_ip_address = true
