@@ -10,6 +10,10 @@ module "vpcs" {
   public_subnets       = each.value.public_subnets
   enable_dns_hostnames = true
   enable_dns_support   = true
+
+  tags = {
+    Environment = "PrivateLink"
+  }
 }
 
 # Create IAM role and IAM instance profile for SSM
