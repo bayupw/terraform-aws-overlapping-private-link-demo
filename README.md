@@ -38,8 +38,8 @@ terraform apply -auto-approve
 
 ## Contributing
 
-Report issues/questions/feature requests on in the [issues](https://github.com/bayupw/terraform-aws-csr1k/issues/new) section.
+Report issues/questions/feature requests on in the [issues](https://github.com/bayupw/terraform-aws-overlapping-private-link-demo/issues/new) section.
 
 ## License
 
-Apache 2 Licensed. See [LICENSE](https://github.com/bayupw/terraform-aws-csr1k/tree/master/LICENSE) for full details.
+Apache 2 Licensed. See [LICENSE](https://github.com/bayupw/terraform-aws-overlapping-private-link-demo/tree/master/LICENSE) for full details.
