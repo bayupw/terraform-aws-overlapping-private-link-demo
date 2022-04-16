@@ -19,7 +19,7 @@ variable "vpcs" {
 
 locals {
   client_hostname    = "privatelinkdemo-client-${random_string.this.id}"
-  webserver_hostname = "privatelinkdemo-client-${random_string.this.id}"
+  webserver_hostname = "privatelinkdemo-webserver-${random_string.this.id}"
   nlb_name           = "privatelinkdemo-nlb-${random_string.this.id}"
   webepsvc_name      = "web-endpoint-service-${random_string.this.id}"
   webepsg_name       = "web-endpoint-sg-${random_string.this.id}"
