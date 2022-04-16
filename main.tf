@@ -147,7 +147,7 @@ data "aws_network_interface" "web_ep_eni" {
 data "aws_network_interface" "nlb_eni" {
   filter {
     name   = "description"
-    values = ["ELB net/nlb/*"]
+    values = ["ELB ${module.nlb.lb_arn_suffix}"]
   }
 
   depends_on = [module.nlb]
