@@ -74,7 +74,7 @@ module "nlb" {
 
   target_groups = [
     {
-      name_prefix      = "webnlb-"
+      name_prefix      = "wnlb-"
       backend_protocol = "TCP"
       backend_port     = 80
       target_type      = "instance"
