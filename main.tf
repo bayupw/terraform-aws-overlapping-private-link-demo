@@ -43,7 +43,7 @@ module "client" {
   private_ip                  = cidrhost(module.vpcs["vpc_a"].public_subnets_cidr_blocks[0], 11)
   iam_instance_profile        = module.ssm_instance_profile.aws_iam_instance_profile
 
-  depends_on = [module.ssm_instance_profile]
+  depends_on = [module.vpcs, module.ssm_instance_profile]
 }
 
 # VPC-B Web Server EC2 instance in VPC-B
@@ -59,7 +59,7 @@ module "web_server" {
   private_ip                  = cidrhost(module.vpcs["vpc_b"].public_subnets_cidr_blocks[0], 11)
   iam_instance_profile        = module.ssm_instance_profile.aws_iam_instance_profile
 
-  depends_on = [module.ssm_instance_profile]
+  depends_on = [module.vpcs, module.ssm_instance_profile]
 }
 
 # Create NLB in VPC-B
@@ -135,6 +135,8 @@ resource "aws_security_group" "web_endpoint_sg" {
     Name        = local.webepsg_name
     Environment = "PrivateLinkDemo"
   }
+
+  depends_on = [module.vpcs]
 }
 
 # Create VPC Endpoint Web in VPC-A
