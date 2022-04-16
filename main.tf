@@ -1,10 +1,18 @@
+# Create 3 digit random string
+resource "random_string" "this" {
+  length  = 3
+  number  = true
+  special = false
+  upper   = false
+}
+
 # Create VPCs, subnets, route tables
 module "vpcs" {
   for_each = var.vpcs
 
   source               = "terraform-aws-modules/vpc/aws"
   version              = "~> 3.0"
-  name                 = each.value.name
+  name                 = "${each.value.name}-${random_string.this.id}"
   cidr                 = each.value.cidr
   azs                  = each.value.azs
   public_subnets       = each.value.public_subnets
@@ -12,7 +20,7 @@ module "vpcs" {
   enable_dns_support   = true
 
   tags = {
-    Environment = "PrivateLink"
+    Environment = "PrivateLinkDemo"
   }
 }
 
@@ -27,7 +35,8 @@ module "client" {
   source  = "bayupw/amazon-linux-2/aws"
   version = "1.0.0"
 
-  instance_hostname           = "privatelinkdemo-client"
+  random_suffix               = false
+  instance_hostname           = local.client_hostname
   vpc_id                      = module.vpcs["vpc_a"].vpc_id
   subnet_id                   = module.vpcs["vpc_a"].public_subnets[0]
   associate_public_ip_address = true
@@ -42,7 +51,8 @@ module "web_server" {
   source  = "bayupw/amazon-linux-2/aws"
   version = "1.0.0"
 
-  instance_hostname           = "privatelinkdemo-web-server"
+  random_suffix               = false
+  instance_hostname           = local.webserver_hostname
   vpc_id                      = module.vpcs["vpc_b"].vpc_id
   subnet_id                   = module.vpcs["vpc_b"].public_subnets[0]
   associate_public_ip_address = true
@@ -57,7 +67,7 @@ module "nlb" {
   source  = "terraform-aws-modules/alb/aws"
   version = "~> 6.0"
 
-  name               = "nlb"
+  name               = local.nlb_name
   load_balancer_type = "network"
   vpc_id             = module.vpcs["vpc_b"].vpc_id
   subnets            = [module.vpcs["vpc_b"].public_subnets[0]]
@@ -101,7 +111,8 @@ resource "aws_vpc_endpoint_service" "web_ep_svc" {
   allowed_principals         = [data.aws_caller_identity.current.arn]
 
   tags = {
-    Name = "web-endpoint-service"
+    Name        = local.webepsvc_name
+    Environment = "PrivateLinkDemo"
   }
 
   depends_on = [module.nlb]
@@ -109,7 +120,7 @@ resource "aws_vpc_endpoint_service" "web_ep_svc" {
 
 # Create Security Group for VPC Endpoint Web in VPC-A
 resource "aws_security_group" "web_endpoint_sg" {
-  name        = "web-endpoint-sg"
+  name        = local.webepsg_name
   description = "Allow all traffic to web-vpc-endpoint"
   vpc_id      = module.vpcs["vpc_a"].vpc_id
 
@@ -121,7 +132,8 @@ resource "aws_security_group" "web_endpoint_sg" {
   }
 
   tags = {
-    Name = "web-endpoint-sg"
+    Name        = local.webepsg_name
+    Environment = "PrivateLinkDemo"
   }
 }
 
@@ -134,7 +146,8 @@ resource "aws_vpc_endpoint" "web_ep" {
   security_group_ids = [aws_security_group.web_endpoint_sg.id]
 
   tags = {
-    Name = "web-endpoint-service"
+    Name        = local.webep_name
+    Environment = "PrivateLinkDemo"
   }
 
   depends_on = [aws_vpc_endpoint_service.web_ep_svc, aws_security_group.web_endpoint_sg]
