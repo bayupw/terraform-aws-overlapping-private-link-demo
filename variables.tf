@@ -1,15 +1,15 @@
 variable "vpcs" {
-  description = "Maps of VPCs' attributes"
+  description = "Maps of VPC attributes"
   type        = map(any)
   default = {
     vpc_a = {
-      name           = "PrivateLink-VPC-A"
+      name           = "PrivateLink-Provider-VPC-A"
       cidr           = "10.0.0.0/16"
       azs            = ["ap-southeast-2a"]
       public_subnets = ["10.0.0.0/24"]
     }
     vpc_b = {
-      name           = "PrivateLink-VPC-B"
+      name           = "PrivateLink-Consumer-VPC-B"
       cidr           = "10.0.0.0/16"
       azs            = ["ap-southeast-2a"]
       public_subnets = ["10.0.0.0/24"]

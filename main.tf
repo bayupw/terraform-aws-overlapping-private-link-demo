@@ -30,33 +30,17 @@ module "ssm_instance_profile" {
   version = "1.0.0"
 }
 
-# VPC-A Client EC2 instance in VPC-A
-module "client" {
-  source  = "bayupw/amazon-linux-2/aws"
-  version = "1.0.0"
-
-  random_suffix               = false
-  instance_hostname           = local.client_hostname
-  vpc_id                      = module.vpcs["vpc_a"].vpc_id
-  subnet_id                   = module.vpcs["vpc_a"].public_subnets[0]
-  associate_public_ip_address = true
-  private_ip                  = cidrhost(module.vpcs["vpc_a"].public_subnets_cidr_blocks[0], 11)
-  iam_instance_profile        = module.ssm_instance_profile.aws_iam_instance_profile
-
-  depends_on = [module.vpcs, module.ssm_instance_profile]
-}
-
-# VPC-B Web Server EC2 instance in VPC-B
+# VPC-A Web Server EC2 instance in VPC-B
 module "web_server" {
   source  = "bayupw/amazon-linux-2/aws"
   version = "1.0.0"
 
   random_suffix               = false
   instance_hostname           = local.webserver_hostname
-  vpc_id                      = module.vpcs["vpc_b"].vpc_id
-  subnet_id                   = module.vpcs["vpc_b"].public_subnets[0]
+  vpc_id                      = module.vpcs["vpc_a"].vpc_id
+  subnet_id                   = module.vpcs["vpc_a"].public_subnets[0]
   associate_public_ip_address = true
-  private_ip                  = cidrhost(module.vpcs["vpc_b"].public_subnets_cidr_blocks[0], 11)
+  private_ip                  = cidrhost(module.vpcs["vpc_a"].public_subnets_cidr_blocks[0], 11)
   iam_instance_profile        = module.ssm_instance_profile.aws_iam_instance_profile
 
   depends_on = [module.vpcs, module.ssm_instance_profile]
@@ -69,8 +53,8 @@ module "nlb" {
 
   name               = local.nlb_name
   load_balancer_type = "network"
-  vpc_id             = module.vpcs["vpc_b"].vpc_id
-  subnets            = [module.vpcs["vpc_b"].public_subnets[0]]
+  vpc_id             = module.vpcs["vpc_a"].vpc_id
+  subnets            = [module.vpcs["vpc_a"].public_subnets[0]]
 
   target_groups = [
     {
@@ -102,9 +86,25 @@ module "nlb" {
   depends_on = [module.web_server]
 }
 
+# VPC-B Client EC2 instance in VPC-B
+module "client" {
+  source  = "bayupw/amazon-linux-2/aws"
+  version = "1.0.0"
+
+  random_suffix               = false
+  instance_hostname           = local.client_hostname
+  vpc_id                      = module.vpcs["vpc_b"].vpc_id
+  subnet_id                   = module.vpcs["vpc_b"].public_subnets[0]
+  associate_public_ip_address = true
+  private_ip                  = cidrhost(module.vpcs["vpc_b"].public_subnets_cidr_blocks[0], 11)
+  iam_instance_profile        = module.ssm_instance_profile.aws_iam_instance_profile
+
+  depends_on = [module.vpcs, module.ssm_instance_profile]
+}
+
 data "aws_caller_identity" "current" {}
 
-# Create VPC Endpoint Services from NLB of VPC-B  
+# Create VPC Endpoint Services of NLB  
 resource "aws_vpc_endpoint_service" "web_ep_svc" {
   acceptance_required        = false
   network_load_balancer_arns = [module.nlb.lb_arn]
@@ -118,11 +118,11 @@ resource "aws_vpc_endpoint_service" "web_ep_svc" {
   depends_on = [module.nlb]
 }
 
-# Create Security Group for VPC Endpoint Web in VPC-A
+# Create Security Group for VPC Endpoint Web in VPC-B
 resource "aws_security_group" "web_endpoint_sg" {
   name        = local.webepsg_name
   description = "Allow all traffic to web-vpc-endpoint"
-  vpc_id      = module.vpcs["vpc_a"].vpc_id
+  vpc_id      = module.vpcs["vpc_b"].vpc_id
 
   ingress {
     from_port       = 80
@@ -139,12 +139,12 @@ resource "aws_security_group" "web_endpoint_sg" {
   depends_on = [module.vpcs]
 }
 
-# Create VPC Endpoint Web in VPC-A
+# Create VPC Endpoint Web in VPC-B
 resource "aws_vpc_endpoint" "web_ep" {
   service_name       = aws_vpc_endpoint_service.web_ep_svc.service_name
-  subnet_ids         = [module.vpcs["vpc_a"].public_subnets[0]]
+  subnet_ids         = [module.vpcs["vpc_b"].public_subnets[0]]
   vpc_endpoint_type  = aws_vpc_endpoint_service.web_ep_svc.service_type
-  vpc_id             = module.vpcs["vpc_a"].vpc_id
+  vpc_id             = module.vpcs["vpc_b"].vpc_id
   security_group_ids = [aws_security_group.web_endpoint_sg.id]
 
   tags = {
@@ -155,14 +155,7 @@ resource "aws_vpc_endpoint" "web_ep" {
   depends_on = [aws_vpc_endpoint_service.web_ep_svc, aws_security_group.web_endpoint_sg]
 }
 
-# Web VPC Endpoint ENI object in VPC-A
-data "aws_network_interface" "web_ep_eni" {
-  id = one(aws_vpc_endpoint.web_ep.network_interface_ids)
-
-  depends_on = [aws_vpc_endpoint.web_ep]
-}
-
-# Web NLB ENI object in VPC-B
+# Web NLB ENI object in VPC-A
 data "aws_network_interface" "nlb_eni" {
   filter {
     name   = "description"
@@ -170,4 +163,11 @@ data "aws_network_interface" "nlb_eni" {
   }
 
   depends_on = [module.nlb]
+}
+
+# Web VPC Endpoint ENI object in VPC-B
+data "aws_network_interface" "web_ep_eni" {
+  id = one(aws_vpc_endpoint.web_ep.network_interface_ids)
+
+  depends_on = [aws_vpc_endpoint.web_ep]
 }
