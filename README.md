@@ -3,6 +3,8 @@
 Terraform code to demonstrate how AWS PrivateLink can be used to solve overlapping IP in AWS.
 ![Terraform AWS Overlapping IP Private Link Demo](images/terraform-aws-overlapping-private-link-demo.png "Terraform AWS Overlapping IP Private Link Demo")
 
+To change VPC details, update variable vpcs - see terraform.tfvars.examples
+
 ## Environment Variables
 
 To run this project, you will need to set the following environment variables
