@@ -8,6 +8,9 @@ To change VPC details, update variable vpcs - see terraform.tfvars.examples
 ## Environment Variables
 
 To run this project, you will need to set the following environment variables
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
+- AWS_DEFAULT_REGION
 
 ## Run Locally
 
