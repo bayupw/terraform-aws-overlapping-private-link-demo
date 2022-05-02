@@ -46,6 +46,7 @@ module "web_server" {
   random_password                = false
   instance_username              = var.username
   instance_password              = var.password
+  key_name                       = var.key_name
 
   depends_on = [module.vpcs, module.ssm_instance_profile]
 }
@@ -106,6 +107,7 @@ module "client" {
   random_password                = false
   instance_username              = var.username
   instance_password              = var.password
+  key_name                       = var.key_name
 
   depends_on = [module.vpcs, module.ssm_instance_profile]
 }

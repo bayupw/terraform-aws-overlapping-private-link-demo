@@ -17,6 +17,24 @@ variable "vpcs" {
   }
 }
 
+variable "username" {
+  description = "EC2 instance username"
+  type        = string
+  default     = "ec2-user"
+}
+
+variable "password" {
+  description = "EC2 instance password"
+  type        = string
+  default     = "Aviatrix123#"
+}
+
+variable "key_name" {
+  description = "Existing EC2 Key Pair"
+  type        = string
+  default     = "ec2_keypair"
+}
+
 locals {
   client_hostname    = "privatelinkdemo-client-${random_string.this.id}"
   webserver_hostname = "privatelinkdemo-webserver-${random_string.this.id}"
