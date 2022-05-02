@@ -35,13 +35,17 @@ module "web_server" {
   source  = "bayupw/amazon-linux-2/aws"
   version = "1.0.0"
 
-  random_suffix               = false
-  instance_hostname           = local.webserver_hostname
-  vpc_id                      = module.vpcs["vpc_a"].vpc_id
-  subnet_id                   = module.vpcs["vpc_a"].public_subnets[0]
-  associate_public_ip_address = true
-  private_ip                  = cidrhost(module.vpcs["vpc_a"].public_subnets_cidr_blocks[0], 11)
-  iam_instance_profile        = module.ssm_instance_profile.aws_iam_instance_profile
+  random_suffix                  = false
+  instance_hostname              = local.webserver_hostname
+  vpc_id                         = module.vpcs["vpc_a"].vpc_id
+  subnet_id                      = module.vpcs["vpc_a"].public_subnets[0]
+  private_ip                     = cidrhost(module.vpcs["vpc_a"].public_subnets_cidr_blocks[0], 11)
+  iam_instance_profile           = module.ssm_instance_profile.aws_iam_instance_profile
+  associate_public_ip_address    = true
+  enable_password_authentication = true
+  random_password                = false
+  instance_username              = var.username
+  instance_password              = var.password
 
   depends_on = [module.vpcs, module.ssm_instance_profile]
 }
@@ -91,13 +95,17 @@ module "client" {
   source  = "bayupw/amazon-linux-2/aws"
   version = "1.0.0"
 
-  random_suffix               = false
-  instance_hostname           = local.client_hostname
-  vpc_id                      = module.vpcs["vpc_b"].vpc_id
-  subnet_id                   = module.vpcs["vpc_b"].public_subnets[0]
-  associate_public_ip_address = true
-  private_ip                  = cidrhost(module.vpcs["vpc_b"].public_subnets_cidr_blocks[0], 11)
-  iam_instance_profile        = module.ssm_instance_profile.aws_iam_instance_profile
+  random_suffix                  = false
+  instance_hostname              = local.client_hostname
+  vpc_id                         = module.vpcs["vpc_b"].vpc_id
+  subnet_id                      = module.vpcs["vpc_b"].public_subnets[0]
+  private_ip                     = cidrhost(module.vpcs["vpc_b"].public_subnets_cidr_blocks[0], 11)
+  iam_instance_profile           = module.ssm_instance_profile.aws_iam_instance_profile
+  associate_public_ip_address    = true
+  enable_password_authentication = true
+  random_password                = false
+  instance_username              = var.username
+  instance_password              = var.password
 
   depends_on = [module.vpcs, module.ssm_instance_profile]
 }
